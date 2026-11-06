@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 #[Fillable([
     'user_id',
@@ -82,5 +83,69 @@ class Order extends Model
         return $this->belongsToMany(Product::class, 'order_items')
             ->withPivot(['product_name', 'unit_price', 'quantity', 'line_total'])
             ->withTimestamps();
+    }
+
+    /**
+     * Get the user's pending order that acts as their cart, creating it if needed.
+     */
+    public static function cartFor(User $user): self
+    {
+        return self::query()->firstOrCreate(
+            ['user_id' => $user->id, 'status' => OrderStatus::Pending],
+            [
+                'order_number' => 'ORD-'.strtoupper(Str::random(10)),
+                'subtotal' => 0,
+                'total' => 0,
+            ],
+        );
+    }
+
+    /**
+     * Set a product's quantity in the cart, capped at stock. A quantity of zero or less removes it.
+     */
+    public function setProductQuantity(Product $product, int $quantity): void
+    {
+        $quantity = min($quantity, $product->stock);
+
+        if ($quantity <= 0) {
+            $this->removeProduct($product);
+
+            return;
+        }
+
+        $this->items()->updateOrCreate(
+            ['product_id' => $product->id],
+            [
+                'product_name' => $product->name,
+                'unit_price' => $product->price,
+                'quantity' => $quantity,
+                'line_total' => round($product->price * $quantity, 2),
+            ],
+        );
+
+        $this->recalculateTotals();
+    }
+
+    /**
+     * Remove a product from the cart.
+     */
+    public function removeProduct(Product $product): void
+    {
+        $this->items()->where('product_id', $product->id)->delete();
+
+        $this->recalculateTotals();
+    }
+
+    /**
+     * Recalculate the subtotal and total from the order items.
+     */
+    public function recalculateTotals(): void
+    {
+        $subtotal = (float) $this->items()->sum('line_total');
+
+        $this->update([
+            'subtotal' => $subtotal,
+            'total' => $subtotal - $this->discount + $this->tax + $this->shipping_fee,
+        ]);
     }
 }

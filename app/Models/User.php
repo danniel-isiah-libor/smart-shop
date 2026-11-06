@@ -60,6 +60,14 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     }
 
     /**
+     * Get the user's cart, which is their pending order.
+     */
+    public function cart(): Order
+    {
+        return Order::cartFor($this);
+    }
+
+    /**
      * Get the user's initials
      */
     public function initials(): string

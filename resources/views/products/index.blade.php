@@ -4,7 +4,7 @@
 
 @forelse ($products as $product)
     <h3>{{ $product->name }}</h3>
-    <p>₱{{ $product->price }}</p>
+    <p>₱{{ number_format($product->price, 2) }}</p>
 @empty
     <p>No products yet.</p>
 @endforelse
