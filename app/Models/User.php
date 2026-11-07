@@ -3,6 +3,14 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthentication;
+use Filament\Auth\MultiFactor\App\Concerns\InteractsWithAppAuthenticationRecovery;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthentication;
+use Filament\Auth\MultiFactor\App\Contracts\HasAppAuthenticationRecovery;
+use Filament\Auth\MultiFactor\Email\Concerns\InteractsWithEmailAuthentication;
+use Filament\Auth\MultiFactor\Email\Contracts\HasEmailAuthentication;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -31,10 +39,10 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
  */
 #[Fillable(['name', 'email', 'password'])]
 #[Hidden(['password', 'two_factor_secret', 'two_factor_recovery_codes', 'remember_token'])]
-class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
+class User extends Authenticatable implements MustVerifyEmail, PasskeyUser, HasAppAuthentication, FilamentUser, HasAppAuthenticationRecovery, HasEmailAuthentication
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use HasFactory, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication;
 
     /**
      * Get the attributes that should be cast.
@@ -75,7 +83,12 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         $initials = Str::initials($this->name, true);
 
         return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
+            ? Str::substr($initials, 0, 1) . Str::substr($initials, -1)
             : $initials;
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
     }
 }
