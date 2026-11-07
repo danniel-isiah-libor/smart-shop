@@ -6,6 +6,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\URL;
 
 class ProductForm
 {
@@ -15,6 +16,7 @@ class ProductForm
             ->components([
                 Select::make('category_id')
                     ->relationship('category', 'name')
+                    ->default(fn () => URL::getRequest()->query('category_id'))
                     ->required(),
 
                 TextInput::make('name')->required(),

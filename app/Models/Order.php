@@ -86,6 +86,14 @@ class Order extends Model
     }
 
     /**
+     * Generate a new random order number.
+     */
+    public static function generateOrderNumber(): string
+    {
+        return 'ORD-'.strtoupper(Str::random(10));
+    }
+
+    /**
      * Get the user's pending order that acts as their cart, creating it if needed.
      */
     public static function cartFor(User $user): self
@@ -93,7 +101,7 @@ class Order extends Model
         return self::query()->firstOrCreate(
             ['user_id' => $user->id, 'status' => OrderStatus::Pending],
             [
-                'order_number' => 'ORD-'.strtoupper(Str::random(10)),
+                'order_number' => self::generateOrderNumber(),
                 'subtotal' => 0,
                 'total' => 0,
             ],

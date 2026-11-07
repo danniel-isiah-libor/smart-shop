@@ -34,6 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->emailChangeVerification()
             ->profile(isSimple: false)
             ->sidebarCollapsibleOnDesktop()
+            ->unsavedChangesAlerts()
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),
                 EmailAuthentication::make()
