@@ -14,6 +14,8 @@ class Category extends Model
     /** @use HasFactory<CategoryFactory> */
     use HasFactory;
 
+    public $withCount = ['products'];
+
     /**
      * Get the products for the category.
      *

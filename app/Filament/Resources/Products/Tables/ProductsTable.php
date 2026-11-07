@@ -9,10 +9,13 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Support\Enums\FontWeight;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -26,12 +29,20 @@ class ProductsTable
                 'md' => 3,
                 'xl' => 4,
             ])
+            ->groups([
+                Group::make('category.name')->collapsible()
+            ])
             ->columns([
                 Stack::make([
-                    TextColumn::make('name')->searchable(),
-
                     TextColumn::make('category.name')
+                        ->size('sm')
+                        ->weight(FontWeight::Light)
                         ->badge(),
+
+                    TextColumn::make('name')
+                        ->size('lg')
+                        ->weight(FontWeight::Bold)
+                        ->searchable(),
 
                     TextColumn::make('price')
                         ->sortable()
@@ -39,6 +50,7 @@ class ProductsTable
 
                     TextColumn::make('stock')
                         ->sortable()
+                        ->formatStateUsing(fn($state) => "Stock: $state")
                         ->color(fn($state) => $state > 0 ? 'success' : 'danger'),
 
                     TextColumn::make('created_at')

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
+use App\Filament\Resources\Categories\Pages\EditCategory;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 
@@ -11,7 +12,10 @@ class ProductInfolist
     {
         return $schema
             ->components([
-                TextEntry::make('category.name')->badge(),
+                TextEntry::make('category.name')
+                    ->url(fn($record) => EditCategory::getUrl(['record' => $record->category_id]))
+                    ->badge()
+                    ->label('Category'),
 
                 TextEntry::make('name'),
 
