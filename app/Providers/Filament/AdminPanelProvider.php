@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Auth\MultiFactor\Email\EmailAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -20,6 +21,7 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Relaticle\Comments\CommentsPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -29,18 +31,24 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->login()
             ->emailVerification()
             ->emailChangeVerification()
             ->profile(isSimple: false)
             ->sidebarCollapsibleOnDesktop()
             ->unsavedChangesAlerts()
+            ->databaseNotifications()
             ->multiFactorAuthentication([
                 AppAuthentication::make()->recoverable(),
-                EmailAuthentication::make()
+                EmailAuthentication::make(),
             ])
             ->colors([
                 'primary' => Color::Teal,
+            ])
+            ->plugins([
+                GlobalSearchModalPlugin::make(),
+                CommentsPlugin::make(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

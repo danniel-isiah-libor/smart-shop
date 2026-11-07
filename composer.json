@@ -7,7 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "charrafimed/global-search-modal": "*",
+        "charrafimed/global-search-modal": "^5.0",
         "filament/filament": "^5.11",
         "laravel/chisel": "^0.1.0",
         "laravel/fortify": "^1.37.2",
@@ -15,7 +15,8 @@
         "laravel/tinker": "^3.0",
         "livewire/blaze": "^1.0",
         "livewire/flux": "^2.13.1",
-        "livewire/livewire": "^4.1"
+        "livewire/livewire": "^4.1",
+        "relaticle/comments": "^1.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",

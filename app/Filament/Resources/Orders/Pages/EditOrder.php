@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Orders\Pages;
 use App\Filament\Resources\Orders\OrderResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use Relaticle\Comments\Filament\Actions\CommentsAction;
 
 class EditOrder extends EditRecord
 {
@@ -13,6 +14,7 @@ class EditOrder extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            CommentsAction::make(),
             DeleteAction::make(),
         ];
     }

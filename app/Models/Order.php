@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Relaticle\Comments\Concerns\HasComments;
+use Relaticle\Comments\Contracts\Commentable;
 
 #[Fillable([
     'user_id',
@@ -31,10 +33,10 @@ use Illuminate\Support\Str;
     'shipping_country',
     'notes',
 ])]
-class Order extends Model
+class Order extends Model implements Commentable
 {
     /** @use HasFactory<OrderFactory> */
-    use HasFactory;
+    use HasComments, HasFactory;
 
     /**
      * Get the attributes that should be cast.
