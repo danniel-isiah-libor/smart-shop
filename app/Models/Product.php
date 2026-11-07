@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['name', 'description', 'price', 'stock', 'category_id'])]
+#[Fillable(['name', 'description', 'price', 'stock', 'category_id', 'supplier_id'])]
 class Product extends Model
 {
     /** @use HasFactory<ProductFactory> */
@@ -23,6 +23,16 @@ class Product extends Model
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /**
+     * Get the supplier of the product.
+     *
+     * @return BelongsTo<Supplier>
+     */
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
     }
 
     /**

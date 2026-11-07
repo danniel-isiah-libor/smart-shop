@@ -74,6 +74,16 @@ class Order extends Model
     }
 
     /**
+     * Get the shipments for the order.
+     *
+     * @return HasMany<Shipment, $this>
+     */
+    public function shipments(): HasMany
+    {
+        return $this->hasMany(Shipment::class);
+    }
+
+    /**
      * Get the products in the order.
      *
      * @return BelongsToMany<Product, $this>

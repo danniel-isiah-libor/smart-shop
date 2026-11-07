@@ -3,6 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\Coupon;
+use App\Models\Order;
+use App\Models\Shipment;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,6 +25,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        $suppliers = Supplier::factory(10)->create();
+
         foreach ($this->catalog() as $categoryName => $products) {
             $category = Category::query()->create(['name' => $categoryName]);
 
@@ -30,11 +36,20 @@ class DatabaseSeeder extends Seeder
                     'description' => fake()->sentence(),
                     'price' => $price,
                     'stock' => fake()->numberBetween(20, 200),
+                    'supplier_id' => $suppliers->random()->id,
                 ]);
             }
         }
 
+        Coupon::factory(20)->create();
+
         $this->call(OrderSeeder::class);
+
+        $orders = Order::query()->get();
+
+        Shipment::factory(15)
+            ->recycle($orders)
+            ->create();
     }
 
     /**
