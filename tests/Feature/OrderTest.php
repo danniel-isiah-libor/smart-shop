@@ -128,3 +128,18 @@ test('order and order item tables have indexes on their lookup columns', functio
         ->and($orderIndexes->contains(['created_at']))->toBeTrue()
         ->and($itemIndexes->contains(['product_id']))->toBeTrue();
 });
+
+test('an order can move from pending to paid', function () {
+    $order = Order::factory()->pending()->create();
+
+    $order->moveTo(OrderStatus::Paid);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Paid);
+});
+
+test('an order refuses an invalid status move', function () {
+    $order = Order::factory()->shipped()->create();
+
+    expect(fn () => $order->moveTo(OrderStatus::Pending))->toThrow(DomainException::class);
+    expect($order->fresh()->status)->toBe(OrderStatus::Shipped);
+});

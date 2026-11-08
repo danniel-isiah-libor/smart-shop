@@ -16,6 +16,9 @@ use Illuminate\Support\Str;
 use Relaticle\Comments\Concerns\HasComments;
 use Relaticle\Comments\Contracts\Commentable;
 
+/**
+ * @property OrderStatus $status
+ */
 #[Fillable([
     'user_id',
     'order_number',
@@ -243,6 +246,23 @@ class Order extends Model implements Commentable
         );
 
         $this->recalculateTotals();
+    }
+
+    /**
+     * Move the order to a new status, refusing invalid transitions.
+     *
+     * @throws \DomainException
+     */
+    public function moveTo(OrderStatus $next): void
+    {
+        if (! $this->status->canMoveTo($next)) {
+            throw new \DomainException(__('Cannot move order from :from to :to.', [
+                'from' => $this->status->getLabel(),
+                'to' => $next->getLabel(),
+            ]));
+        }
+
+        $this->update(['status' => $next]);
     }
 
     /**

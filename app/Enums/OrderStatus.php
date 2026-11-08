@@ -18,6 +18,24 @@ enum OrderStatus: string implements HasColor, HasLabel
         return ucfirst($this->value);
     }
 
+    /**
+     * @return list<self>
+     */
+    public function allowedNext(): array
+    {
+        return match ($this) {
+            self::Pending => [self::Paid, self::Cancelled],
+            self::Paid => [self::Shipped, self::Cancelled],
+            self::Shipped => [self::Delivered],
+            self::Delivered, self::Cancelled => [],
+        };
+    }
+
+    public function canMoveTo(self $next): bool
+    {
+        return in_array($next, $this->allowedNext(), true);
+    }
+
     public function getColor(): string
     {
         return match ($this) {

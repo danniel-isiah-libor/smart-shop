@@ -26,6 +26,9 @@ class OrderForm
                 Select::make('status')
                     ->options(OrderStatus::class)
                     ->default(OrderStatus::Pending)
+                    ->disabled()
+                    ->dehydrated(fn (string $operation): bool => $operation === 'create')
+                    ->helperText('Change the status with the order actions.')
                     ->required(),
 
                 Repeater::make('items')

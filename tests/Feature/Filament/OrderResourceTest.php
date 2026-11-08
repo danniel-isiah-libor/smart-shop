@@ -61,13 +61,12 @@ test('an order requires at least one item', function () {
         ->assertHasFormErrors(['items']);
 });
 
-test('editing an order updates its status and recalculates totals', function () {
+test('editing an order recalculates totals', function () {
     $order = Order::factory()->create();
     $item = OrderItem::factory()->for($order)->create(['quantity' => 1, 'unit_price' => 5, 'line_total' => 5]);
 
     Livewire::test(EditOrder::class, ['record' => $order->getRouteKey()])
         ->fillForm([
-            'status' => OrderStatus::Shipped,
             'items' => [
                 "record-{$item->id}" => ['product_id' => $item->product_id, 'quantity' => 4, 'unit_price' => 5],
             ],
@@ -75,8 +74,7 @@ test('editing an order updates its status and recalculates totals', function () 
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($order->fresh()->status)->toBe(OrderStatus::Shipped)
-        ->and($order->fresh()->total)->toBe('20.00');
+    expect($order->fresh()->total)->toBe('20.00');
 });
 
 test('the list page shows the order count per status', function () {
@@ -87,4 +85,28 @@ test('the list page shows the order count per status', function () {
 
     Livewire::test(OrderStatusStats::class)
         ->assertSeeInOrder(['Pending', '0', 'Paid', '2', 'Shipped', '0', 'Delivered', '0', 'Cancelled', '1']);
+});
+
+test('status actions only show for allowed moves and move the order', function () {
+    $order = Order::factory()->pending()->create();
+
+    Livewire::test(EditOrder::class, ['record' => $order->getRouteKey()])
+        ->assertActionVisible('markAsPaid')
+        ->assertActionVisible('cancel')
+        ->assertActionHidden('ship')
+        ->assertActionHidden('markAsDelivered')
+        ->callAction('markAsPaid');
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Paid);
+});
+
+test('the status field is read-only when editing an order', function () {
+    $order = Order::factory()->pending()->create();
+
+    Livewire::test(EditOrder::class, ['record' => $order->getRouteKey()])
+        ->assertFormFieldDisabled('status')
+        ->fillForm(['status' => OrderStatus::Delivered])
+        ->call('save');
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Pending);
 });

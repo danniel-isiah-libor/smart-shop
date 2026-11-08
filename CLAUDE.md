@@ -19,6 +19,8 @@
 - Admin prices use money('PHP')
 - Customers are User records. Never add a customers table.
 - An order’s total is calculated from its items in the Order model.
+- Change order status only through Order::moveTo().
+  Never update orders.status directly.
 
 ## Don’t
 - Edit migrations that already ran
