@@ -3,6 +3,7 @@
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\ProductController;
 use App\Livewire\Cart;
+use App\Livewire\Checkout;
 use App\Livewire\ProductDetail;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('/products/{product}', ProductDetail::class)->name('products.show');
 
     Route::livewire('/cart', Cart::class)->name('cart');
+
+    Route::livewire('/checkout', Checkout::class)->name('checkout');
 });
 
 require __DIR__.'/settings.php';

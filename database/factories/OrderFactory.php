@@ -36,6 +36,14 @@ class OrderFactory extends Factory
             'shipping_state' => $this->faker->state(),
             'shipping_postal_code' => $this->faker->postcode(),
             'shipping_country' => $this->faker->country(),
+            'billing_name' => $this->faker->name(),
+            'billing_address_line1' => $this->faker->streetAddress(),
+            'billing_address_line2' => null,
+            'billing_city' => $this->faker->city(),
+            'billing_state' => $this->faker->state(),
+            'billing_postal_code' => $this->faker->postcode(),
+            'billing_country' => 'Philippines',
+            'idempotency_key' => null,
             'notes' => null,
         ];
     }

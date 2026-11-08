@@ -59,7 +59,7 @@
                         <flux:heading>{{ __('Total') }}</flux:heading>
                         <flux:heading size="xl" data-test="summary-total">₱{{ number_format($summary['total'], 2) }}</flux:heading>
                     </div>
-                    <flux:button variant="primary" class="w-full">{{ __('Checkout') }}</flux:button>
+                    <flux:button variant="primary" class="w-full" :href="route('checkout')" wire:navigate>{{ __('Checkout') }}</flux:button>
                 </flux:card>
             </aside>
         </div>

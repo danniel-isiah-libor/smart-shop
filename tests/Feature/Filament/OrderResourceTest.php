@@ -4,6 +4,7 @@ use App\Enums\OrderStatus;
 use App\Filament\Resources\Orders\Pages\CreateOrder;
 use App\Filament\Resources\Orders\Pages\EditOrder;
 use App\Filament\Resources\Orders\Pages\ListOrders;
+use App\Filament\Widgets\OrderStatusStats;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -76,4 +77,14 @@ test('editing an order updates its status and recalculates totals', function () 
 
     expect($order->fresh()->status)->toBe(OrderStatus::Shipped)
         ->and($order->fresh()->total)->toBe('20.00');
+});
+
+test('the list page shows the order count per status', function () {
+    Order::factory()->paid()->count(2)->create();
+    Order::factory()->cancelled()->create();
+
+    Livewire::test(ListOrders::class)->assertSuccessful();
+
+    Livewire::test(OrderStatusStats::class)
+        ->assertSeeInOrder(['Pending', '0', 'Paid', '2', 'Shipped', '0', 'Delivered', '0', 'Cancelled', '1']);
 });

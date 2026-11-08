@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Coupons\Pages;
 
 use App\Filament\Resources\Coupons\CouponResource;
+use App\Filament\Widgets\CouponStats;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,6 +15,13 @@ class ListCoupons extends ListRecords
     {
         return [
             CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            CouponStats::class,
         ];
     }
 }

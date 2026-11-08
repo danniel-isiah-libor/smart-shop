@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Shipments\Pages;
 
 use App\Filament\Resources\Shipments\ShipmentResource;
+use App\Filament\Widgets\ShipmentStats;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 
@@ -14,6 +15,13 @@ class ListShipments extends ListRecords
     {
         return [
             CreateAction::make(),
+        ];
+    }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            ShipmentStats::class,
         ];
     }
 }

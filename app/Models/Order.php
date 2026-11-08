@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Relaticle\Comments\Concerns\HasComments;
 use Relaticle\Comments\Contracts\Commentable;
@@ -31,6 +33,14 @@ use Relaticle\Comments\Contracts\Commentable;
     'shipping_state',
     'shipping_postal_code',
     'shipping_country',
+    'billing_name',
+    'billing_address_line1',
+    'billing_address_line2',
+    'billing_city',
+    'billing_state',
+    'billing_postal_code',
+    'billing_country',
+    'idempotency_key',
     'notes',
 ])]
 class Order extends Model implements Commentable
@@ -95,6 +105,95 @@ class Order extends Model implements Commentable
         return $this->belongsToMany(Product::class, 'order_items')
             ->withPivot(['product_name', 'unit_price', 'quantity', 'line_total'])
             ->withTimestamps();
+    }
+
+    public const VAT_RATE = 0.12;
+
+    /**
+     * Calculate the VAT charged on a subtotal.
+     */
+    public static function vatFor(float $subtotal): float
+    {
+        return round($subtotal * self::VAT_RATE, 2);
+    }
+
+    /**
+     * Place the user's cart as a paid order. Safe to retry: the same idempotency
+     * key returns the order it already produced instead of placing another.
+     *
+     * @param  array<string, string|null>  $billing  Keys: name, address_line1, address_line2, city, state, postal_code, country
+     * @param  array<string, string|null>  $shipping  Same keys as $billing
+     *
+     * @throws \DomainException When the cart is empty or an item is out of stock.
+     */
+    public static function place(User $user, string $idempotencyKey, array $billing, array $shipping): self
+    {
+        $existing = fn (): ?self => self::query()
+            ->where('user_id', $user->id)
+            ->where('idempotency_key', $idempotencyKey)
+            ->first();
+
+        try {
+            return DB::transaction(function () use ($user, $idempotencyKey, $billing, $shipping, $existing): self {
+                if ($order = $existing()) {
+                    return $order;
+                }
+
+                $cart = self::query()
+                    ->where('user_id', $user->id)
+                    ->where('status', OrderStatus::Pending)
+                    ->lockForUpdate()
+                    ->first();
+
+                $items = $cart?->items()->get();
+
+                if ($items === null || $items->isEmpty()) {
+                    throw new \DomainException(__('Your cart is empty.'));
+                }
+
+                foreach ($items as $item) {
+                    $product = Product::query()->lockForUpdate()->find($item->product_id);
+
+                    if ($product === null || $product->stock < $item->quantity) {
+                        throw new \DomainException(__(':name is no longer available in the requested quantity.', ['name' => $item->product_name]));
+                    }
+
+                    $product->decrement('stock', $item->quantity);
+                }
+
+                $cart->fill([
+                    ...self::addressAttributes('billing', $billing),
+                    ...self::addressAttributes('shipping', $shipping),
+                    'tax' => self::vatFor((float) $items->sum('line_total')),
+                    'status' => OrderStatus::Paid,
+                    'idempotency_key' => $idempotencyKey,
+                ])->save();
+
+                $cart->recalculateTotals();
+
+                return $cart->refresh();
+            });
+        } catch (UniqueConstraintViolationException $e) {
+            // A concurrent request with the same key won the race.
+            return $existing() ?? throw $e;
+        }
+    }
+
+    /**
+     * Prefix address fields with their column group (billing_ or shipping_).
+     *
+     * @param  array<string, string|null>  $address
+     * @return array<string, string|null>
+     */
+    protected static function addressAttributes(string $prefix, array $address): array
+    {
+        $attributes = [];
+
+        foreach ($address as $field => $value) {
+            $attributes["{$prefix}_{$field}"] = $value;
+        }
+
+        return $attributes;
     }
 
     /**
