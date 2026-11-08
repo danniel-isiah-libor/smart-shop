@@ -25,7 +25,7 @@ it('has factory states', function () {
 });
 
 it('authorizes staff via the policy', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->superAdmin()->create();
 
     expect($user->can('create', Coupon::class))->toBeTrue()
         ->and($user->can('update', Coupon::factory()->create()))->toBeTrue();

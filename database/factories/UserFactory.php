@@ -3,9 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use Database\Seeders\ShieldSeeder;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 /**
  * @extends Factory<User>
@@ -56,5 +59,17 @@ class UserFactory extends Factory
             'two_factor_recovery_codes' => encrypt(json_encode(['recovery-code-1'])),
             'two_factor_confirmed_at' => now(),
         ]);
+    }
+
+    /**
+     * Indicate that the user is a super admin with access to everything.
+     */
+    public function superAdmin(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            Artisan::call('db:seed', ['--class' => ShieldSeeder::class, '--force' => true]);
+
+            $user->assignRole(Role::findByName('super_admin'));
+        });
     }
 }
