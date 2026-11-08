@@ -100,6 +100,16 @@ class Order extends Model implements Commentable
     }
 
     /**
+     * Get the status changes for the order, latest first.
+     *
+     * @return HasMany<OrderStatusHistory, $this>
+     */
+    public function statusHistories(): HasMany
+    {
+        return $this->hasMany(OrderStatusHistory::class)->latest('created_at')->latest('id');
+    }
+
+    /**
      * Get the products in the order.
      *
      * @return BelongsToMany<Product, $this>
@@ -172,6 +182,8 @@ class Order extends Model implements Commentable
                     'status' => OrderStatus::Paid,
                     'idempotency_key' => $idempotencyKey,
                 ])->save();
+
+                $cart->recordStatusChange(OrderStatus::Pending, OrderStatus::Paid, $user);
 
                 $cart->recalculateTotals();
 
@@ -250,11 +262,12 @@ class Order extends Model implements Commentable
     }
 
     /**
-     * Move the order to a new status, refusing invalid transitions.
+     * Move the order to a new status, refusing invalid transitions, and record who did it.
+     * The actor defaults to the authenticated user; null means the system.
      *
      * @throws \DomainException
      */
-    public function moveTo(OrderStatus $next): void
+    public function moveTo(OrderStatus $next, ?User $by = null): void
     {
         if (! $this->status->canMoveTo($next)) {
             throw new \DomainException(__('Cannot move order from :from to :to.', [
@@ -264,10 +277,27 @@ class Order extends Model implements Commentable
         }
 
         $previous = $this->status;
+        $by ??= auth()->user();
 
-        $this->update(['status' => $next]);
+        DB::transaction(function () use ($previous, $next, $by): void {
+            $this->update(['status' => $next]);
+
+            $this->recordStatusChange($previous, $next, $by);
+        });
 
         OrderStatusChanged::dispatch($this, $previous);
+    }
+
+    /**
+     * Write a status history row. The only place history is created.
+     */
+    protected function recordStatusChange(?OrderStatus $from, OrderStatus $to, ?User $by = null): OrderStatusHistory
+    {
+        return $this->statusHistories()->create([
+            'user_id' => $by?->getKey(),
+            'from_status' => $from,
+            'to_status' => $to,
+        ]);
     }
 
     /**
