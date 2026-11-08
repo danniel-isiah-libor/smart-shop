@@ -17,7 +17,9 @@
         "livewire/blaze": "^1.0",
         "livewire/flux": "^2.13.1",
         "livewire/livewire": "^4.1",
-        "relaticle/comments": "^1.1"
+        "relaticle/comments": "^1.1",
+        "stechstudio/filament-impersonate": "^5.7",
+        "wallacemartinss/filament-onboarding": "^2.1"
     },
     "require-dev": {
         "fakerphp/faker": "^1.24",

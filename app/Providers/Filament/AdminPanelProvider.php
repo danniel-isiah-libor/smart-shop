@@ -2,8 +2,8 @@
 
 namespace App\Providers\Filament;
 
-use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
+use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Auth\MultiFactor\Email\EmailAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -23,6 +23,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Relaticle\Comments\CommentsPlugin;
+use Wallacemartinss\FilamentOnboarding\FilamentOnboardingPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -51,6 +52,10 @@ class AdminPanelProvider extends PanelProvider
                 FilamentShieldPlugin::make(),
                 GlobalSearchModalPlugin::make(),
                 CommentsPlugin::make(),
+                FilamentOnboardingPlugin::make()
+                    ->launcher()
+                    ->tours()
+                    ->progressPage(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

@@ -50,6 +50,8 @@ class DatabaseSeeder extends Seeder
         Shipment::factory(15)
             ->recycle($orders)
             ->create();
+
+        $this->call(OnboardingSeeder::class);
     }
 
     /**
