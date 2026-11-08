@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Pages;
 
+use App\Filament\Resources\Orders\OrderCouponActions;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Filament\Resources\Orders\OrderStatusActions;
 use Filament\Actions\DeleteAction;
@@ -16,6 +17,7 @@ class EditOrder extends EditRecord
     {
         return [
             ...OrderStatusActions::make(),
+            ...OrderCouponActions::make(),
             CommentsAction::make(),
             DeleteAction::make(),
         ];

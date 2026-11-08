@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\OrderStatus;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -86,5 +87,18 @@ class OrderFactory extends Factory
     public function cancelled(): static
     {
         return $this->state(['status' => OrderStatus::Cancelled]);
+    }
+
+    /**
+     * Attach a coupon to the order, creating one when none is given. Totals are not recalculated.
+     */
+    public function withCoupon(?Coupon $coupon = null): static
+    {
+        $coupon ??= Coupon::factory()->create();
+
+        return $this->state(fn () => [
+            'coupon_id' => $coupon->getKey(),
+            'coupon_code' => $coupon->code,
+        ]);
     }
 }

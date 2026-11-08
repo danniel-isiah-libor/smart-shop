@@ -2,6 +2,7 @@
 
 use App\Enums\OrderStatus;
 use App\Livewire\Checkout;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -166,4 +167,40 @@ test('the dashboard shows the order placed message', function () {
     $this->withSession(['status' => 'Your order has been placed.'])
         ->get(route('dashboard'))
         ->assertSee('Your order has been placed.');
+});
+
+test('placing an order decrements every product exactly once', function () {
+    $a = stockedCart($this->user, stock: 10, quantity: 2);
+    $b = Product::factory()->create(['price' => 50, 'stock' => 4]);
+    $this->user->cart()->setProductQuantity($b, 4);
+
+    $order = Order::place($this->user, 'key-1', checkoutAddress(), checkoutAddress());
+    Order::place($this->user, 'key-1', checkoutAddress(), checkoutAddress());
+
+    expect($order->status)->toBe(OrderStatus::Paid)
+        ->and($a->fresh()->stock)->toBe(8)
+        ->and($b->fresh()->stock)->toBe(0);
+});
+
+test('a placed order that is later cancelled gives its stock back once', function () {
+    $product = stockedCart($this->user, stock: 10, quantity: 3);
+    $order = Order::place($this->user, 'key-1', checkoutAddress(), checkoutAddress());
+
+    $order->moveTo(OrderStatus::Cancelled);
+
+    expect($product->fresh()->stock)->toBe(10);
+
+    expect(fn () => $order->refresh()->moveTo(OrderStatus::Cancelled))->toThrow(DomainException::class);
+    expect($product->fresh()->stock)->toBe(10);
+});
+
+test('placing an order keeps an applied coupon discount', function () {
+    stockedCart($this->user, stock: 10, quantity: 2, price: 100);
+    $this->user->cart()->applyCoupon(Coupon::factory()->create(['discount' => 50]));
+
+    $order = Order::place($this->user, 'key-1', checkoutAddress(), checkoutAddress());
+
+    expect($order->discount)->toBe('50.00')
+        ->and($order->coupon_id)->not->toBeNull()
+        ->and($order->total)->toBe('174.00');
 });

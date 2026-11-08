@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\OrderStatus;
+use App\Models\Coupon;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
@@ -180,5 +181,33 @@ test('an invalid status move sends no notification', function () {
 
     expect(fn () => $order->moveTo(OrderStatus::Pending))->toThrow(DomainException::class);
 
+    Notification::assertNothingSent();
+});
+
+test('an order links its coupon and the link is cleared when the coupon is deleted', function () {
+    $coupon = Coupon::factory()->create(['code' => 'LINKED']);
+    $order = Order::factory()->withCoupon($coupon)->create();
+
+    expect($order->coupon->is($coupon))->toBeTrue();
+
+    $coupon->delete();
+
+    expect($order->fresh()->coupon_id)->toBeNull()
+        ->and($order->fresh()->coupon_code)->toBe('LINKED');
+});
+
+test('an order cannot reference a coupon that does not exist', function () {
+    Order::factory()->create(['coupon_id' => 999999]);
+})->throws(QueryException::class);
+
+test('a failed payment move leaves the order pending and notifies nobody', function () {
+    Notification::fake();
+    $order = Order::factory()->pending()->create();
+    $product = Product::factory()->create(['stock' => 0]);
+    OrderItem::factory()->for($order)->for($product)->create(['quantity' => 1]);
+
+    expect(fn () => $order->moveTo(OrderStatus::Paid))->toThrow(DomainException::class);
+
+    expect($order->fresh()->status)->toBe(OrderStatus::Pending);
     Notification::assertNothingSent();
 });

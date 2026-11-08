@@ -24,7 +24,10 @@ class OrderForm
                     ->required(),
 
                 Select::make('status')
-                    ->options(OrderStatus::class)
+                    ->options(fn (string $operation): array => collect(OrderStatus::cases())
+                        ->when($operation === 'create', fn ($cases) => $cases->filter(fn (OrderStatus $status): bool => $status === OrderStatus::Pending))
+                        ->mapWithKeys(fn (OrderStatus $status): array => [$status->value => $status->getLabel()])
+                        ->all())
                     ->default(OrderStatus::Pending)
                     ->disabled()
                     ->dehydrated(fn (string $operation): bool => $operation === 'create')
