@@ -5,8 +5,10 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use App\Notifications\OrderStatusUpdated;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
 
 test('a new order defaults to the pending status', function () {
@@ -142,4 +144,41 @@ test('an order refuses an invalid status move', function () {
 
     expect(fn () => $order->moveTo(OrderStatus::Pending))->toThrow(DomainException::class);
     expect($order->fresh()->status)->toBe(OrderStatus::Shipped);
+});
+
+test('moving an order notifies the customer with a link', function () {
+    Notification::fake();
+    $order = Order::factory()->pending()->create();
+
+    $order->moveTo(OrderStatus::Paid);
+
+    Notification::assertSentTo($order->user, OrderStatusUpdated::class, function ($notification) use ($order) {
+        $mail = $notification->toMail($order->user);
+
+        return $mail->actionUrl === route('dashboard')
+            && str_contains($mail->subject, $order->order_number)
+            && str_contains($mail->subject, 'Paid');
+    });
+});
+
+test('a cancelled order gets a friendlier message', function () {
+    Notification::fake();
+    $order = Order::factory()->pending()->create();
+
+    $order->moveTo(OrderStatus::Cancelled);
+
+    Notification::assertSentTo($order->user, OrderStatusUpdated::class, function ($notification) use ($order) {
+        $lines = implode(' ', $notification->toMail($order->user)->introLines);
+
+        return str_contains($lines, "We're sorry") && str_contains($lines, $order->order_number);
+    });
+});
+
+test('an invalid status move sends no notification', function () {
+    Notification::fake();
+    $order = Order::factory()->shipped()->create();
+
+    expect(fn () => $order->moveTo(OrderStatus::Pending))->toThrow(DomainException::class);
+
+    Notification::assertNothingSent();
 });

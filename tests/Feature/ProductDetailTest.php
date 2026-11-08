@@ -6,6 +6,8 @@ use App\Livewire\ProductList;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 test('guests are redirected to login', function () {
@@ -88,4 +90,16 @@ test('suggested products share the category, exclude the current one and are cli
         ->assertSee('Related')
         ->assertDontSee('Elsewhere')
         ->assertSeeHtml('href="'.route('products.show', $related).'"');
+});
+
+test('product page shows the uploaded product images', function () {
+    Storage::fake('public');
+    config(['media-library.disk_name' => 'public']);
+    $this->actingAs(User::factory()->create());
+    $product = Product::factory()->create();
+    $product->addMedia(UploadedFile::fake()->image('front.jpg'))->toMediaCollection(Product::IMAGE_COLLECTION);
+
+    $this->get(route('products.show', $product))
+        ->assertOk()
+        ->assertSee($product->getFirstMediaUrl(Product::IMAGE_COLLECTION), false);
 });

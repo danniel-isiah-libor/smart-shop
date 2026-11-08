@@ -4,8 +4,31 @@
     </div>
 
     <section aria-label="{{ __('Product details') }}" class="flex flex-wrap items-start gap-8">
-        <div class="relative aspect-square w-full max-w-md flex-1 basis-80 overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+        @php($images = $product->getMedia(\App\Models\Product::IMAGE_COLLECTION))
+        <div class="flex w-full max-w-md flex-1 basis-80 flex-col gap-3" x-data="{ current: @js($images->first()?->getUrl()) }">
+            <div class="relative aspect-square overflow-hidden rounded-xl border border-neutral-200 dark:border-neutral-700">
+                @if ($images->isNotEmpty())
+                    <img src="{{ $images->first()->getUrl() }}" x-bind:src="current" alt="{{ $product->name }}" class="absolute inset-0 size-full object-cover" />
+                @else
+                    <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+                @endif
+            </div>
+
+            @if ($images->count() > 1)
+                <div class="flex flex-wrap gap-2" role="group" aria-label="{{ __('Product images') }}">
+                    @foreach ($images as $image)
+                        <button
+                            type="button"
+                            wire:key="image-{{ $image->id }}"
+                            x-on:click="current = @js($image->getUrl())"
+                            aria-label="{{ __('Show image :number', ['number' => $loop->iteration]) }}"
+                            class="size-16 overflow-hidden rounded-lg border border-neutral-200 focus-visible:outline-2 focus-visible:outline-offset-2 dark:border-neutral-700"
+                        >
+                            <img src="{{ $image->getUrl('thumb') }}" alt="" loading="lazy" class="size-full object-cover" />
+                        </button>
+                    @endforeach
+                </div>
+            @endif
         </div>
 
         <div class="flex min-w-0 flex-1 basis-80 flex-col gap-5">

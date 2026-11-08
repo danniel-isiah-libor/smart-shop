@@ -45,7 +45,7 @@ class CategoriesTable
 
                         DateTimePicker::make('updated_until')
                             ->label('Updated Until'),
-                    ])
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

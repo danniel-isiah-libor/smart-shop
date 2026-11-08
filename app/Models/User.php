@@ -47,13 +47,13 @@ class User extends Authenticatable implements Commentator, FilamentUser, HasAppA
     /** @use HasFactory<UserFactory> */
     use CanComment,
         HasFactory,
+        HasRoles,
         InteractsWithAppAuthentication,
         InteractsWithAppAuthenticationRecovery,
         InteractsWithEmailAuthentication,
         Notifiable,
         PasskeyAuthenticatable,
-        TwoFactorAuthenticatable,
-        HasRoles;
+        TwoFactorAuthenticatable;
 
     /**
      * Get the attributes that should be cast.
@@ -94,7 +94,7 @@ class User extends Authenticatable implements Commentator, FilamentUser, HasAppA
         $initials = Str::initials($this->name, true);
 
         return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1) . Str::substr($initials, -1)
+            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
             : $initials;
     }
 

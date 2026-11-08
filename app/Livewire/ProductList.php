@@ -51,7 +51,7 @@ class ProductList extends Component
     public function getProductsProperty(): LengthAwarePaginator
     {
         return Product::query()
-            ->with('category')
+            ->with(['category', 'media'])
             ->when($this->search !== '', fn ($query) => $query->where('name', 'like', '%'.$this->search.'%'))
             ->when($this->category !== '', fn ($query) => $query->where('category_id', $this->category))
             ->when($this->stock === 'in', fn ($query) => $query->where('stock', '>', 0))

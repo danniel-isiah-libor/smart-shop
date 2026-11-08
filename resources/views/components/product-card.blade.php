@@ -7,7 +7,11 @@
 >
     <flux:card class="flex h-full flex-col gap-3 overflow-hidden !p-0 transition group-hover:border-zinc-400 dark:group-hover:border-zinc-500">
         <div class="relative h-36 overflow-hidden border-b border-neutral-200 dark:border-neutral-700">
-            <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+            @if ($thumbnailUrl = $product->getFirstMediaUrl(\App\Models\Product::IMAGE_COLLECTION, 'thumb'))
+                <img src="{{ $thumbnailUrl }}" alt="{{ $product->name }}" loading="lazy" class="absolute inset-0 size-full object-cover" />
+            @else
+                <x-placeholder-pattern class="absolute inset-0 size-full stroke-gray-900/20 dark:stroke-neutral-100/20" />
+            @endif
         </div>
 
         <div class="flex flex-1 flex-col gap-2 px-5 pb-5">

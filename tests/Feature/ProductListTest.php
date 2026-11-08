@@ -4,6 +4,8 @@ use App\Livewire\ProductList;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -61,4 +63,15 @@ test('empty results show a message and clearing filters restores the list', func
         ->call('clearFilters')
         ->assertSet('search', '')
         ->assertSee('Lamp');
+});
+
+test('product cards show the product thumbnail', function () {
+    Storage::fake('public');
+    config(['media-library.disk_name' => 'public']);
+    $this->actingAs(User::factory()->create());
+    $product = Product::factory()->create();
+    $product->addMedia(UploadedFile::fake()->image('front.png'))->toMediaCollection(Product::IMAGE_COLLECTION);
+
+    Livewire::test(ProductList::class)
+        ->assertSeeHtml($product->getFirstMediaUrl(Product::IMAGE_COLLECTION, 'thumb'));
 });

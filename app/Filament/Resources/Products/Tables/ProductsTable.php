@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Models\Product;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
@@ -10,8 +11,8 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Enums\FontWeight;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\Layout\Stack;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -30,10 +31,17 @@ class ProductsTable
                 'xl' => 4,
             ])
             ->groups([
-                Group::make('category.name')->collapsible()
+                Group::make('category.name')->collapsible(),
             ])
             ->columns([
                 Stack::make([
+                    SpatieMediaLibraryImageColumn::make('images')
+                        ->collection(Product::IMAGE_COLLECTION)
+                        ->conversion('thumb')
+                        ->limit(1)
+                        ->imageSize(120)
+                        ->label('Image'),
+
                     TextColumn::make('category.name')
                         ->size('sm')
                         ->weight(FontWeight::Light)
@@ -46,12 +54,12 @@ class ProductsTable
 
                     TextColumn::make('price')
                         ->sortable()
-                        ->formatStateUsing(fn($state) => '₱' . number_format($state, 2)),
+                        ->formatStateUsing(fn ($state) => '₱'.number_format($state, 2)),
 
                     TextColumn::make('stock')
                         ->sortable()
-                        ->formatStateUsing(fn($state) => "Stock: $state")
-                        ->color(fn($state) => $state > 0 ? 'success' : 'danger'),
+                        ->formatStateUsing(fn ($state) => "Stock: $state")
+                        ->color(fn ($state) => $state > 0 ? 'success' : 'danger'),
 
                     TextColumn::make('created_at')
                         ->sortable()
@@ -60,7 +68,7 @@ class ProductsTable
                     TextColumn::make('updated_at')
                         ->sortable()
                         ->dateTime('m/d/Y h:i A'),
-                ])
+                ]),
             ])
             ->filters([
                 SelectFilter::make('category_id')
@@ -71,7 +79,7 @@ class ProductsTable
                     'in_stock' => 'In Stock',
                     'out_of_stock' => 'Out of Stock',
                 ])
-                    ->query(fn(Builder $query, array $data) => $data['value'] === 'out_of_stock' ? $query->where('stock', '=', 0) : $query->where('stock', '>', 0)),
+                    ->query(fn (Builder $query, array $data) => $data['value'] === 'out_of_stock' ? $query->where('stock', '=', 0) : $query->where('stock', '>', 0)),
 
                 Filter::make('created_at')
                     ->schema([
@@ -87,7 +95,7 @@ class ProductsTable
                         DateTimePicker::make('updated_until')
                             ->native(false)
                             ->default(now()),
-                    ])
+                    ]),
             ])
             ->recordActions([
                 ActionGroup::make([

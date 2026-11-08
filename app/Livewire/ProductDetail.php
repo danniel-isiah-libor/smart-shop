@@ -16,7 +16,7 @@ class ProductDetail extends Component
 
     public function mount(Product $product): void
     {
-        $this->product = $product->load('category');
+        $this->product = $product->load(['category', 'media']);
     }
 
     public function incrementQuantity(): void
@@ -42,7 +42,7 @@ class ProductDetail extends Component
 
         $cart->setProductQuantity($product, $existing + $this->quantity);
 
-        $this->product = $product->load('category');
+        $this->product = $product->load(['category', 'media']);
         $this->quantity = 1;
 
         Flux::toast(text: __('Added to your cart.'), variant: 'success');
@@ -54,7 +54,7 @@ class ProductDetail extends Component
     public function getSuggestedProductsProperty(): Collection
     {
         return Product::query()
-            ->with('category')
+            ->with(['category', 'media'])
             ->where('category_id', $this->product->category_id)
             ->whereKeyNot($this->product->id)
             ->latest('id')

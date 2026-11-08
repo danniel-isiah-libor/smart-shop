@@ -30,7 +30,7 @@ class OrderStatusStats extends StatsOverviewWidget
             ->pluck('total', 'status');
 
         return array_map(
-            fn(OrderStatus $status): Stat => Stat::make($status->getLabel(), (int) ($counts[$status->value] ?? 0))
+            fn (OrderStatus $status): Stat => Stat::make($status->getLabel(), (int) ($counts[$status->value] ?? 0))
                 ->color($status->getColor()),
             OrderStatus::cases(),
         );
