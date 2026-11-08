@@ -25,6 +25,7 @@ use Laravel\Fortify\PasskeyAuthenticatable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Relaticle\Comments\Concerns\CanComment;
 use Relaticle\Comments\Contracts\Commentator;
+use Spatie\Permission\Traits\HasRoles;
 
 /**
  * @property int $id
@@ -44,7 +45,15 @@ use Relaticle\Comments\Contracts\Commentator;
 class User extends Authenticatable implements Commentator, FilamentUser, HasAppAuthentication, HasAppAuthenticationRecovery, HasEmailAuthentication, MustVerifyEmail, PasskeyUser
 {
     /** @use HasFactory<UserFactory> */
-    use CanComment, HasFactory, InteractsWithAppAuthentication, InteractsWithAppAuthenticationRecovery, InteractsWithEmailAuthentication, Notifiable, PasskeyAuthenticatable, TwoFactorAuthenticatable;
+    use CanComment,
+        HasFactory,
+        InteractsWithAppAuthentication,
+        InteractsWithAppAuthenticationRecovery,
+        InteractsWithEmailAuthentication,
+        Notifiable,
+        PasskeyAuthenticatable,
+        TwoFactorAuthenticatable,
+        HasRoles;
 
     /**
      * Get the attributes that should be cast.
@@ -85,7 +94,7 @@ class User extends Authenticatable implements Commentator, FilamentUser, HasAppA
         $initials = Str::initials($this->name, true);
 
         return Str::length($initials) > 1
-            ? Str::substr($initials, 0, 1).Str::substr($initials, -1)
+            ? Str::substr($initials, 0, 1) . Str::substr($initials, -1)
             : $initials;
     }
 

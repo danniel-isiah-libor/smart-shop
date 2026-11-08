@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use CharrafiMed\GlobalSearchModal\GlobalSearchModalPlugin;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Auth\MultiFactor\App\AppAuthentication;
 use Filament\Auth\MultiFactor\Email\EmailAuthentication;
 use Filament\Http\Middleware\Authenticate;
@@ -47,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Teal,
             ])
             ->plugins([
+                FilamentShieldPlugin::make(),
                 GlobalSearchModalPlugin::make(),
                 CommentsPlugin::make(),
             ])

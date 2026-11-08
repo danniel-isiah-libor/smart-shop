@@ -4,11 +4,14 @@ namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class ShipmentStats extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected function getStats(): array
     {
         return [

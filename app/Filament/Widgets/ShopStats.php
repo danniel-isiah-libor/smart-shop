@@ -4,12 +4,15 @@ namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use BezhanSalleh\FilamentShield\Traits\HasWidgetShield;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Number;
 
 class ShopStats extends StatsOverviewWidget
 {
+    use HasWidgetShield;
+
     protected function getStats(): array
     {
         $revenue = Order::query()
