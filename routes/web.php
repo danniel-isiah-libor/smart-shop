@@ -4,6 +4,7 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\ProductController;
 use App\Livewire\Cart;
 use App\Livewire\Checkout;
+use App\Livewire\OrderConfirmation;
 use App\Livewire\ProductDetail;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::livewire('/cart', Cart::class)->name('cart');
 
     Route::livewire('/checkout', Checkout::class)->name('checkout');
+
+    Route::livewire('/orders/{order}/confirmation', OrderConfirmation::class)->name('orders.confirmation');
 });
 
 require __DIR__.'/settings.php';

@@ -41,16 +41,14 @@ class Checkout extends Component
         $shipping = $this->sameAsBilling ? $this->billing : $this->shipping;
 
         try {
-            Order::place(auth()->user(), $this->idempotencyKey, $this->billing, $shipping);
+            $order = Order::place(auth()->user(), $this->idempotencyKey, $this->billing, $shipping);
         } catch (\DomainException $e) {
             $this->addError('order', $e->getMessage());
 
             return;
         }
 
-        session()->flash('status', __('Your order has been placed.'));
-
-        $this->redirectRoute('dashboard', navigate: true);
+        $this->redirectRoute('orders.confirmation', $order, navigate: true);
     }
 
     /**

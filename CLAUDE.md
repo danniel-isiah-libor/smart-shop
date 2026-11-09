@@ -27,6 +27,9 @@
 - Touch Fortify/auth files unless asked
 - Add packages without asking
 
+## Do
+- always use subagents (.claude/agents/*.md)
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.

@@ -71,7 +71,7 @@ test('placing an order marks it paid, saves addresses, tax and decrements stock'
     fillCheckout(Livewire::test(Checkout::class), same: false)
         ->call('placeOrder')
         ->assertHasNoErrors()
-        ->assertRedirect(route('dashboard'));
+        ->assertRedirect(route('orders.confirmation', Order::query()->where('user_id', $this->user->id)->sole()));
 
     $order = Order::query()->where('user_id', $this->user->id)->sole();
 

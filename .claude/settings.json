@@ -1,6 +1,7 @@
 {
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
-    "skill-creator@anthropic-plugin-directory": true
+    "skill-creator@anthropic-plugin-directory": true,
+    "playwright@anthropic-plugin-directory": true
   }
 }
